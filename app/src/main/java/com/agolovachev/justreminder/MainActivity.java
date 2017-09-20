@@ -19,45 +19,53 @@ import com.agolovachev.justreminder.dialogs.AddingTaskDialogFragment;
 import com.agolovachev.justreminder.fragments.CurrentTaskFragment;
 import com.agolovachev.justreminder.fragments.DoneTaskFragment;
 import com.agolovachev.justreminder.fragments.SplashFragment;
+import com.agolovachev.justreminder.fragments.TaskFragment;
 import com.agolovachev.justreminder.model.ModelTask;
 
-public class MainActivity extends AppCompatActivity implements AddingTaskDialogFragment.AddingTaskListener {
+public class MainActivity extends AppCompatActivity
+        implements AddingTaskDialogFragment.AddingTaskListener,
+        CurrentTaskFragment.OnTaskDoneListener, DoneTaskFragment.OnTaskRestoreListener{
     FragmentManager fragmentManager;
+
     PreferenceHelper preferenceHelper;
     TabAdapter tabAdapter;
 
-    CurrentTaskFragment currentTaskFragment;
-    DoneTaskFragment doneTaskFragment;
+    TaskFragment currentTaskFragment;
+    TaskFragment doneTaskFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        fragmentManager = getFragmentManager();
 
         PreferenceHelper.getInstance().init(getApplicationContext());
         preferenceHelper = PreferenceHelper.getInstance();
 
-        runSplash();
-        SetUI();
+        fragmentManager = getFragmentManager();
 
+        runSplash();
+
+        setUI();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem splashItem = menu.findItem(R.id.action_splash);
         splashItem.setChecked(preferenceHelper.getBoolean(PreferenceHelper.SPLASH_IS_INVISIBLE));
-
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_splash)
-        {
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_splash) {
             item.setChecked(!item.isChecked());
             preferenceHelper.putBoolean(PreferenceHelper.SPLASH_IS_INVISIBLE, item.isChecked());
             return true;
@@ -66,21 +74,22 @@ public class MainActivity extends AppCompatActivity implements AddingTaskDialogF
         return super.onOptionsItemSelected(item);
     }
 
-    public void runSplash()
-    {
-        if (!preferenceHelper.getBoolean(PreferenceHelper.SPLASH_IS_INVISIBLE)) {
+    public void runSplash() {
+        if(!preferenceHelper.getBoolean(PreferenceHelper.SPLASH_IS_INVISIBLE)) {
             SplashFragment splashFragment = new SplashFragment();
 
             fragmentManager.beginTransaction()
-                    .replace(R.id.coordinator, splashFragment)
+                    .replace(R.id.content_frame, splashFragment)
                     .addToBackStack(null)
                     .commit();
         }
+
     }
 
-    private void SetUI(){
+    private void setUI() {
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null){
+        if (toolbar != null) {
             toolbar.setTitleTextColor(getResources().getColor(R.color.white));
             setSupportActionBar(toolbar);
         }
@@ -95,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements AddingTaskDialogF
         viewPager.setAdapter(tabAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
@@ -110,10 +119,14 @@ public class MainActivity extends AppCompatActivity implements AddingTaskDialogF
             public void onTabReselected(TabLayout.Tab tab) {
 
             }
+
+
+
         });
 
-        currentTaskFragment = (CurrentTaskFragment) tabAdapter.getItem(TabAdapter.CURRENT_TASK_FRAGMENT_POSTION);
-        doneTaskFragment = (DoneTaskFragment) tabAdapter.getItem(TabAdapter.DONE_TASK_FRAGMENT_POSTION);
+        currentTaskFragment = (CurrentTaskFragment) tabAdapter.getItem(TabAdapter.CURRENT_TASK_FRAGMENT_POSITION);
+        doneTaskFragment = (DoneTaskFragment) tabAdapter.getItem(TabAdapter.DONE_TASK_FRAGMENT_POSITION);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -132,7 +145,17 @@ public class MainActivity extends AppCompatActivity implements AddingTaskDialogF
 
     @Override
     public void onTaskAddingCancel() {
-        Toast.makeText(this, "Task adding cancelled", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Task adding cancel", Toast.LENGTH_LONG).show();
 
+    }
+
+    @Override
+    public void onTaskDone(ModelTask task) {
+        doneTaskFragment.addTask(task);
+    }
+
+    @Override
+    public void onTaskRestore(ModelTask task) {
+        currentTaskFragment.addTask(task);
     }
 }
