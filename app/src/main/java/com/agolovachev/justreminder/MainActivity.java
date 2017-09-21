@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.agolovachev.justreminder.adapters.TabAdapter;
+import com.agolovachev.justreminder.database.DBHelper;
 import com.agolovachev.justreminder.dialogs.AddingTaskDialogFragment;
 import com.agolovachev.justreminder.fragments.CurrentTaskFragment;
 import com.agolovachev.justreminder.fragments.DoneTaskFragment;
@@ -25,6 +26,7 @@ import com.agolovachev.justreminder.model.ModelTask;
 public class MainActivity extends AppCompatActivity
         implements AddingTaskDialogFragment.AddingTaskListener,
         CurrentTaskFragment.OnTaskDoneListener, DoneTaskFragment.OnTaskRestoreListener{
+
     FragmentManager fragmentManager;
 
     PreferenceHelper preferenceHelper;
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity
     TaskFragment currentTaskFragment;
     TaskFragment doneTaskFragment;
 
+    public DBHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity
 
         PreferenceHelper.getInstance().init(getApplicationContext());
         preferenceHelper = PreferenceHelper.getInstance();
+
+        dbHelper = new DBHelper(getApplicationContext());
 
         fragmentManager = getFragmentManager();
 
@@ -140,7 +146,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onTaskAdded(ModelTask newTask) {
-        currentTaskFragment.addTask(newTask);
+        currentTaskFragment.addTask(newTask, true);
     }
 
     @Override
@@ -151,11 +157,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onTaskDone(ModelTask task) {
-        doneTaskFragment.addTask(task);
+        doneTaskFragment.addTask(task, false);
     }
 
     @Override
     public void onTaskRestore(ModelTask task) {
-        currentTaskFragment.addTask(task);
+        currentTaskFragment.addTask(task, false);
     }
 }

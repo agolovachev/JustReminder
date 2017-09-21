@@ -2,6 +2,8 @@ package com.agolovachev.justreminder.model;
 
 import com.agolovachev.justreminder.R;
 
+import java.util.Date;
+
 public class ModelTask implements Item {
 
     public static final int PRIORITY_LOW = 0;
@@ -10,58 +12,66 @@ public class ModelTask implements Item {
 
     public static final String[] PRIORITY_LEVELS = {"Low Priority", "Normal Priority", "High Priority"};
 
-    public  static final int STATUS_OVERDUE = 0;
-    public  static final int STATUS_CURRENT = 1;
-    public  static final int STATUS_DONE = 2;
+    public static final int STATUS_OVERDUE = 0;
+    public static final int STATUS_CURRENT = 1;
+    public static final int STATUS_DONE = 2;
+
 
     private String title;
     private long date;
     private int priority;
     private int status;
+    private long timeStamp;
 
     public ModelTask() {
         this.status = -1;
+        this.timeStamp = new Date().getTime();
     }
 
-    public ModelTask(String title, long date, int priority, int status) {
+    public ModelTask(String title, long date, int priority, int status, long timeStamp) {
         this.title = title;
         this.date = date;
         this.priority = priority;
         this.status = status;
+        this.timeStamp = timeStamp;
     }
+
+
+    public int getPriorityColor() {
+        switch (getPriority()) {
+
+            case PRIORITY_HIGH:
+                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE) {
+                    return R.color.priority_high;
+                } else {
+                    return R.color.priority_high_selected;
+                }
+            case PRIORITY_NORMAL:
+                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE) {
+                    return R.color.priority_normal;
+                } else {
+                    return R.color.priority_normal_selected;
+                }
+            case PRIORITY_LOW:
+                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE) {
+                    return R.color.priority_low;
+                } else {
+                    return R.color.priority_low_selected;
+                }
+
+            default: return 0;
+        }
+    }
+
 
     @Override
     public boolean isTask() {
         return true;
     }
 
+
     public String getTitle() {
         return title;
-    }
-
-    public int getPriorityColor(){
-        switch (getPriority()){
-
-            case PRIORITY_HIGH:
-                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE){
-                    return R.color.priority_high;
-                } else {
-                    return R.color.priority_high_selected;
-                }
-            case PRIORITY_NORMAL:
-                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE){
-                    return R.color.priority_normal;
-                } else {
-                    return R.color.priority_normal_selected;
-                }
-            case PRIORITY_LOW:
-                if (getStatus() == STATUS_CURRENT || getStatus() == STATUS_OVERDUE){
-                    return R.color.priority_low;
-                } else {
-                    return R.color.priority_low_selected;
-                }
-            default: return 0;
-        }
     }
 
     public void setTitle(String title) {
@@ -90,5 +100,13 @@ public class ModelTask implements Item {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }
