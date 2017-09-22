@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.agolovachev.justreminder.adapters.TabAdapter;
+import com.agolovachev.justreminder.alarm.AlarmHelper;
 import com.agolovachev.justreminder.database.DBHelper;
 import com.agolovachev.justreminder.dialogs.AddingTaskDialogFragment;
 import com.agolovachev.justreminder.fragments.CurrentTaskFragment;
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity
         PreferenceHelper.getInstance().init(getApplicationContext());
         preferenceHelper = PreferenceHelper.getInstance();
 
+
+        AlarmHelper.getInstance().init(getApplicationContext());
+
         dbHelper = new DBHelper(getApplicationContext());
 
         fragmentManager = getFragmentManager();
@@ -55,6 +59,18 @@ public class MainActivity extends AppCompatActivity
         runSplash();
 
         setUI();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.activityPaused();
     }
 
     @Override
@@ -130,13 +146,13 @@ public class MainActivity extends AppCompatActivity
             }
 
 
-
         });
 
         currentTaskFragment = (CurrentTaskFragment) tabAdapter.getItem(TabAdapter.CURRENT_TASK_FRAGMENT_POSITION);
         doneTaskFragment = (DoneTaskFragment) tabAdapter.getItem(TabAdapter.DONE_TASK_FRAGMENT_POSITION);
 
         searchView = (SearchView) findViewById(R.id.search_view);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -150,6 +166,7 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

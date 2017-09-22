@@ -11,6 +11,7 @@ import android.view.View;
 import com.agolovachev.justreminder.MainActivity;
 import com.agolovachev.justreminder.R;
 import com.agolovachev.justreminder.adapters.TaskAdapter;
+import com.agolovachev.justreminder.alarm.AlarmHelper;
 import com.agolovachev.justreminder.model.Item;
 import com.agolovachev.justreminder.model.ModelTask;
 
@@ -27,6 +28,8 @@ public abstract class TaskFragment extends Fragment {
 
     public MainActivity activity;
 
+    public AlarmHelper alarmHelper;
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -36,13 +39,15 @@ public abstract class TaskFragment extends Fragment {
             activity = (MainActivity) getActivity();
         }
 
+        alarmHelper = AlarmHelper.getInstance();
+
         addTaskFromDB();
     }
 
     public void addTask(ModelTask newTask, boolean saveToDB) {
         int position = -1;
 
-        for (int i = 0; i < adapter.getItemCount(); i++) {
+        for (int i = 0; i < adapter.getItemCount(); i ++) {
             if (adapter.getItem(i).isTask()) {
                 ModelTask task = (ModelTask) adapter.getItem(i);
                 if (newTask.getDate() < task.getDate()) {
@@ -63,6 +68,7 @@ public abstract class TaskFragment extends Fragment {
         }
     }
 
+
     public void removeTaskDialog(final int location) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
@@ -71,6 +77,7 @@ public abstract class TaskFragment extends Fragment {
         Item item = adapter.getItem(location);
 
         if (item.isTask()) {
+
             ModelTask removingTask = (ModelTask) item;
 
             final long timeStamp = removingTask.getTimeStamp();
@@ -82,7 +89,6 @@ public abstract class TaskFragment extends Fragment {
 
                     adapter.removeItem(location);
                     isRemoved[0] = true;
-
                     Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.coordinator),
                             R.string.removed, Snackbar.LENGTH_LONG);
                     snackbar.setAction(R.string.dialog_cancel, new View.OnClickListener() {
@@ -92,7 +98,6 @@ public abstract class TaskFragment extends Fragment {
                             isRemoved[0] = false;
                         }
                     });
-
                     snackbar.getView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                         @Override
                         public void onViewAttachedToWindow(View v) {
@@ -101,15 +106,19 @@ public abstract class TaskFragment extends Fragment {
 
                         @Override
                         public void onViewDetachedFromWindow(View v) {
-                            if (isRemoved[0]){
+                            if (isRemoved[0]) {
+                                alarmHelper.removeAlarm(timeStamp);
                                 activity.dbHelper.removeTask(timeStamp);
+
                             }
                         }
                     });
 
                     snackbar.show();
 
+
                     dialog.dismiss();
+
                 }
             });
 
@@ -119,10 +128,12 @@ public abstract class TaskFragment extends Fragment {
                     dialog.cancel();
                 }
             });
+
         }
 
         dialogBuilder.show();
     }
+
 
     public abstract void findTasks(String title);
 
