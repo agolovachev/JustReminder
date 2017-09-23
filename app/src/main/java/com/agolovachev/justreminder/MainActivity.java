@@ -19,6 +19,7 @@ import com.agolovachev.justreminder.adapters.TabAdapter;
 import com.agolovachev.justreminder.alarm.AlarmHelper;
 import com.agolovachev.justreminder.database.DBHelper;
 import com.agolovachev.justreminder.dialogs.AddingTaskDialogFragment;
+import com.agolovachev.justreminder.dialogs.EditTaskDialogFragment;
 import com.agolovachev.justreminder.fragments.CurrentTaskFragment;
 import com.agolovachev.justreminder.fragments.DoneTaskFragment;
 import com.agolovachev.justreminder.fragments.SplashFragment;
@@ -27,7 +28,8 @@ import com.agolovachev.justreminder.model.ModelTask;
 
 public class MainActivity extends AppCompatActivity
         implements AddingTaskDialogFragment.AddingTaskListener,
-        CurrentTaskFragment.OnTaskDoneListener, DoneTaskFragment.OnTaskRestoreListener{
+        CurrentTaskFragment.OnTaskDoneListener, DoneTaskFragment.OnTaskRestoreListener,
+        EditTaskDialogFragment.EditingTaskListener{
 
     FragmentManager fragmentManager;
 
@@ -197,5 +199,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onTaskRestore(ModelTask task) {
         currentTaskFragment.addTask(task, false);
+    }
+
+    @Override
+    public void onTaskEdited(ModelTask updatedTask) {
+        currentTaskFragment.updateTask(updatedTask);
+        dbHelper.update().task(updatedTask);
     }
 }
